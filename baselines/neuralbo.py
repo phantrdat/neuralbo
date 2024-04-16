@@ -1,8 +1,4 @@
 import os
-import random
-from random import sample
-from tkinter.messagebox import NO
-
 os.environ["KMP_DUPLICATE_LIB_OK"]="TRUE"
 import copy
 import math
@@ -196,50 +192,6 @@ class NeuralBO():
 		self.model.eval()
 		target_Y_pred = self.model(x_test)
 		print(f"- Eval objective model MSE at iteration {self.iteration}:", nn.MSELoss()(target_y_test, target_Y_pred.squeeze()).double().item())
-	
- 	# def optimize_acquisition(self, X, bounds):
-	# 	if self.acqf_optimizer == 'Adam':
-	# 		adam_optimizer = torch.optim.Adam([X], lr=0.001)
-
-	# 		for i in range(200):
-	# 			adam_optimizer.zero_grad()
-	# 			values, _ = self.TS(X)
-	# 			objective = values.sum()
-	# 			objective.backward()
-	# 			adam_optimizer.step()
-	# 			for j, (lb, ub) in enumerate(bounds):
-	# 				X.data[...,j].clamp_(lb, ub)
-					
-	# 	if self.acqf_optimizer == 'L-BFGS':
-	# 		print("----------------------------------------LBFGS------------------")
-	# 		lbfgs_optimizer = torch.optim.LBFGS([X],
-	#                 history_size=10, 
-	#                 max_iter=4, 
-	#                 line_search_fn="strong_wolfe")
-	# 		def closure():
-	# 			lbfgs_optimizer.zero_grad()
-	# 			values, _ = self.TS(X)
-	# 			objective = values.sum()
-	# 			objective.backward()
-	# 			return objective
-	# 		for i in range(20):
-	# 			lbfgs_optimizer.step(closure)
-	# 			for j, (lb, ub) in enumerate(bounds):
-	# 				X.data[...,j].clamp_(lb, ub)
-				
-	# 	samples, (predictive_means, predictive_stds) = self.TS(X)
-	# 	return X, samples, (predictive_means, predictive_stds)
-	# def optimize_acquisition_discrete(self, X):
-	# 	batch_size = 5
-		
-	# 	chunks = torch.split(X, batch_size)
-	# 	acqf_values = []
-	# 	for b in chunks:
-	# 		acqf_v, (pmean, pvar) =  self.TS(b)
-	# 		acqf_values += acqf_v
-	# 	acqf_values = torch.stack(acqf_values)
-	# 	return X[torch.argmin(acqf_values)], torch.argmin(acqf_values)
-
 
 	def minimize(self, objective):
 		
@@ -255,7 +207,6 @@ class NeuralBO():
 			optimal_values = [objective.value(self.X_train[-1], is_noise=False).item()]
 		else:
 			optimal_values = [init_points['observations'][-1].item()]
-
 
 		objective.max = objective.max.to(self.device)
 		objective.min = objective.min.to(self.device)
@@ -274,9 +225,7 @@ class NeuralBO():
 				Y_train = (self.Y_train-self.Y_train.mean())/self.Y_train.std()
 			else:
 				Y_train = self.Y_train
-			loss = self.train(X_train, Y_train)
-	
-		
+			loss = self.train(X_train, Y_train)	
 		self.model.eval()
 		torch.manual_seed(1504)
 		x_test = objective.generate_features(10000).to(self.device)	
@@ -294,38 +243,26 @@ class NeuralBO():
 			X_cand = objective.generate_features(self.n_raw_samples).to(self.device)
 			if self.normalized_inputs:
 				X_cand = (X_cand - X_mean)/X_std
-			
-			
 			f_hat, (posterior_mu, posterior_std) = self.sample_function_value(X_cand)
-
 			min_idx = torch.argmin(f_hat)
-			
 			xt_mu, xt_std, xt_acqf = posterior_mu[min_idx], posterior_std[min_idx], f_hat[min_idx]
-   
 			X_next = X_cand[min_idx]
-
 			self.update_A_inv(X_next)
 
 			if self.normalized_inputs:
 				X_next = (X_next*X_std + X_mean).detach()
 			else:
 				X_next = X_next.detach()
-
-
+			
 			self.X_train = torch.cat([self.X_train, X_next.clone().unsqueeze(0)])
-			
-
 			observation = objective.value(X_next)
-			
+
 			if self.objective_type == 'synthetic':
 				true_value = objective.value(X_next, is_noise=False)
 			else:
 				true_value = observation
-
 			self.Y_train = torch.cat([self.Y_train, observation.unsqueeze(0)])
-
 			if (T+1) % self.update_cycle == 0:
-				
 				print(f"** Train NeuralBO with {self.epochs} epochs")
 				
 				if self.normalized_inputs:				
@@ -337,7 +274,6 @@ class NeuralBO():
 				else:
 					Y_train = self.Y_train
 				loss = self.train(X_train, Y_train)
-				
 				self.model.eval()
 				
 			self.test_mse(x_test, y_gt)
@@ -346,8 +282,6 @@ class NeuralBO():
 			print(f"\n**** Iteration [{T+1}/{self.n_iters}], acqf value = {xt_acqf}")
 
 			optimal_values.append(true_value.item())
-
-			
 
 		return optimal_values
 	

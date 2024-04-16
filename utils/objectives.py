@@ -4,6 +4,7 @@ import torch
 import torch
 from torch.quasirandom import SobolEngine
 import time
+
 class Objective():
 	def __init__(self, dim, **kwargs) -> None:
 		self.dim = dim
@@ -16,6 +17,7 @@ class Objective():
 			self.noise_std = None
 		self.features = None
 		self.target_observations = None
+	
 	def noise_std_estimate(self):
 		torch.manual_seed(2609)
 		points = self.generate_features(10000)
@@ -46,15 +48,12 @@ class Objective():
 	@abstractmethod  
 	def value(self, X, is_noise):
 		pass
-	@abstractmethod
-	def constraints(self,X, is_noise):
-		pass
 
-	
+
 	@property
 	def func_name(self):
-		pass
-
+		return self.__class__.__name__
+	
 class Ackley(Objective):
 	def __init__(self, dim) -> None:
 		super().__init__(dim)
@@ -77,6 +76,4 @@ class Ackley(Objective):
 		c = 2*np.pi
 		target =  -a * torch.exp(-b * torch.sqrt(delta * torch.sum(X**2))) - torch.exp(delta * torch.sum(torch.cos(c * X))) + torch.e + a + noise
 		return target
-	@property
-	def func_name(self):
-		return "Ackley"
+	

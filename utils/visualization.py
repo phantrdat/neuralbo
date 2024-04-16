@@ -30,14 +30,20 @@ def create_gif(image_folder, output_file, duration=0.5):
 
 
 
-def plot_2d_constrained_optimization(space, optimal_pkl_file, func_name):
-	min_x, max_x, min_y, max_y = space
-	# Generate sample data
-	# x = np.linspace(min_x, max_x, 100)  # 2D array
-	# y = np.linspace(min_y, max_y, 100)     # 1D array
-	# X, Y = np.meshgrid(x, y)      # Creating grid from 1D arrays
+def plot_2d_constrained_optimization(optimal_pkl_file, output_dir='visualization/'):
+	temp_dir = 'temp/'
+	
+	if os.path.isdir(temp_dir)==False:
+		os.mkdir(temp_dir)
+	if os.path.isdir(output_dir)==False:
+		os.mkdir(output_dir)
 
-
+	D = pkl.load(
+			open(optimal_pkl_file,'rb'), encoding='utf-8') 
+	min_x, min_y = D['function_properties']['min'].cpu().numpy()
+	max_x, max_y = D['function_properties']['max'].cpu().numpy()
+	func_name = D['function_name']
+	
 	# Create colormap plot
 	plt.figure(figsize=(8, 6))
 	
@@ -50,12 +56,11 @@ def plot_2d_constrained_optimization(space, optimal_pkl_file, func_name):
 	plt.ylim(bottom=min_y, top=max_y)
 	plt.title(f'2D Constrained Optimization - {func_name}')
 	plt.tight_layout()
-	D = pkl.load(
-			open(optimal_pkl_file,'rb'), encoding='utf-8')
-
-	optimal_points = D['X_train'].numpy()
-	optimal_values = D['optimal_values']
-
+	
+	# Get selected points w.r.t optimization steps, ignore initialization points
+	n_points = D['alg_configs'].n_iters
+	optimal_points = D['X_train'][-n_points:].numpy()
+	optimal_values = D['optimal_values'][-n_points:]
 
 
 	min_idx = np.argmin(optimal_values)
@@ -68,43 +73,40 @@ def plot_2d_constrained_optimization(space, optimal_pkl_file, func_name):
 
 	gif_id = optimal_pkl_file.split('.')[1]
 
-	if os.path.isdir('figures')==False:
-		os.mkdir('figures')
+	
 		
 	for k, (x1, x2) in enumerate(zip(X1, X2)):
-			if optimal_values[k] == minimal_value:
-				marker = "*"
-				color = "red"
-				marker_size = 30
-			else: 
-				marker = '.'
-				color = "blue"
-				marker_size = 30
-			plt.scatter(x1, x2, s=marker_size, color=color, marker=marker)
-			plt.plot()
-			file_name = f'figures/{k:03d}.png'
-			plt.savefig(file_name, dpi=300)
-			if k== len(X1)-1:
-				plt.savefig(f'final_figures/{func_name}_{gif_id}.png', dpi=300)
-	# 
-	# save last figures 
+		if optimal_values[k] == minimal_value:
+			marker = "*"
+			color = "red"
+			marker_size = 30
+			x1_star, x2_star = (x1,x2)
+		else: 
+			marker = '.'
+			color = "blue"
+			marker_size = 30
+		plt.scatter(x1, x2, s=marker_size, color=color, marker=marker)
+		plt.plot()
+		file_name = f'temp/{k:03d}.png'
+		plt.savefig(file_name, dpi=300)
+		if k == len(X1)-1:
+			# save last figures
+			
+   
+			plt.scatter(x1_star, x2_star, s=marker_size, color='red', marker='*')
+			figure_path = os.path.join(output_dir, f"{func_name}_{gif_id}.png")
+			plt.savefig(figure_path, dpi=300)
+	
 	
 	gif_id = optimal_pkl_file.split('.')[1]
-	create_gif("figures/",f'{func_name}_c_{gif_id}.gif', duration=300)
-	shutil.rmtree('figures')
+	create_gif(temp_dir,os.path.join(output_dir, f'{func_name}_{gif_id}.gif'), duration=300)
+	shutil.rmtree('temp')
 	
 	plt.clf()
 
 
 if __name__ == '__main__':
 
-	space = (-32.768, 32.768, -32.768, 32.768)
-	func_name = "ackley"
-
-
-
-
-	for i in range(1,2):
-		optimum_pkl = f"results/Ackley_DIM_2_ITERS_200/NeuralBO/NeuralBO_Ackley_dim2.{i}.pkl"
-		plot_2d_constrained_optimization(space, optimum_pkl, func_name)
+	optimum_pkl = f"results/Ackley_DIM_2_ITERS_100/NeuralBO/NeuralBO_Ackley_dim2.01.pkl"
+	plot_2d_constrained_optimization(optimum_pkl)
 
