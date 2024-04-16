@@ -9,9 +9,9 @@ This is an official implementation of paper "NeuralBO: A black-box optimization 
 ```
 conda install pytorch cudatoolkit=11.7 -c pytorch
 ```
-### Run demo
+### Run the algorithm
 ```
-python demo.py -cfg <path_to_config_file>
+python main.py -cfg <path_to_config_file>
 ``` 
 ### Customize your objective function
 To define your new objective function, please consider the example Ackley function in utils/objective.py.
