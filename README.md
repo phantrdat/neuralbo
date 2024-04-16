@@ -21,8 +21,8 @@ To plot the minimum values found by the algorithm, use utils/plot_min_values.py
 To plot the minimal points chosen at each optimization step, use utils/visualization.py
 
 <div>
-    <img src="min_values_plot/Ackley_DIM_2_NITERS_100.png" alt="Min values found" style="width: 30%;">
-    <img src="visualization/Ackley_01.png" alt="Optimization visualization" style="width: 30%;">
+    <img src="min_values_plot/Ackley_DIM_2_NITERS_100.png" alt="Min values found" style="width: 40%;">
+    <img src="visualization/Ackley_01.png" alt="Optimization visualization" style="width: 40%;">
 </div>
 
 ## Citation
