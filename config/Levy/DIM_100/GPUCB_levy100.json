@@ -1,0 +1,14 @@
+{
+    "function_name": "Levy",
+    "function_type": "syn",
+    "algorithm_type": "GPUCB",
+    "acquisition_name": "UCB",
+    "dimension": 100,
+    "n_restart": 25,
+    "n_iter": 2000,
+    "kernel_names": [
+        "RBF"
+    ],
+    "first_run": 1,
+    "last_run": 11
+}
