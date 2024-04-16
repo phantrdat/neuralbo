@@ -1,4 +1,4 @@
-# An mplementation of the paper "NeuralBO: A black-box optimization algorithm using deep neural networks". 
+# An implementation of the paper "NeuralBO: A black-box optimization algorithm using deep neural networks". 
 [Paper](https://www.sciencedirect.com/science/article/abs/pii/S0925231223008998)
 
 ## Introduction
@@ -21,8 +21,8 @@ To plot the minimum values found by the algorithm, use utils/plot_min_values.py
 To plot the minimal points chosen at each optimization step, use utils/visualization.py
 
 <div>
-    <img src="min_values_plot/Ackley_DIM_2_NITERS_100.png" alt="Min values found" style="width: 49.5%;">
-    <img src="visualization/Ackley_01.png" alt="Optimization visualization" style="width: 49.5%;">
+    <img src="min_values_plot/Ackley_DIM_2_NITERS_100.png" alt="Min values found" style="width: 48%;">
+    <img src="visualization/Ackley_01.png" alt="Optimization visualization" style="width: 48%;">
 </div>
 
 ## Citation
